@@ -13,6 +13,8 @@ import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.example.rpda_interface.R;
+import com.example.rpda_interface.model.action.ActionKind;
+import com.example.rpda_interface.repository.RSABaseRepository;
 import com.example.rpda_interface.viewmodel.RPDAViewModel;
 
 
@@ -25,18 +27,24 @@ public class MainActivity extends Activity implements PopupMenu.OnMenuItemClickL
     AutomatonCanvas automatonCanvas;
     HorizontalScrollView horizontalScroller;
     ScrollView verticalScroller;
+    RSABaseRepository rsaBaseRepo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        rsaBaseRepo = new RSABaseRepository();
+        Thread concurrentActionListener = new Thread(rsaBaseRepo);
+        concurrentActionListener.start();
 
         containerLayout = findViewById(R.id.containerLayout);
         linkStateText = findViewById(R.id.linkStateInput);
         rpdaViewModel = new RPDAViewModel(this);
         automatonCanvas = new AutomatonCanvas(this, rpdaViewModel);
 
+        //HorizontalScrollView is customized to allow 2d scrolling
+        //and to allow child-controls to access relevant touch- and gesture-events
         horizontalScroller = new HorizontalScrollView(this) {
             View content;
 
@@ -53,6 +61,8 @@ public class MainActivity extends Activity implements PopupMenu.OnMenuItemClickL
             }
         };
 
+        //ScrollView is customized to allow 2d scrolling
+        //and to allow child-controls to access relevant touch- and gesture-events
         verticalScroller = new ScrollView(this) {
             HorizontalScrollView horizontalScroller;
 
@@ -81,18 +91,18 @@ public class MainActivity extends Activity implements PopupMenu.OnMenuItemClickL
         horizontalScroller.addView(automatonCanvas);
         verticalScroller.addView(horizontalScroller);
         containerLayout.addView(verticalScroller);
-
     }
 
-    public void createState(View view) {
 
+
+    public void createState(View view) {
         rpdaViewModel.handleStateAction(this);
         automatonCanvas.invalidate();
     }
 
 
-    public void linkState(View view) {
 
+    public void linkState(View view) {
         int id;
         String text = linkStateText.getText().toString();
         CharSequence message;
@@ -114,19 +124,28 @@ public class MainActivity extends Activity implements PopupMenu.OnMenuItemClickL
         automatonCanvas.invalidate();
     }
 
+
+
     public void undoAction(View view) {
         rpdaViewModel.undo();
         automatonCanvas.invalidate();
     }
+
+
 
     public void redoAction(View view) {
         rpdaViewModel.redo();
         automatonCanvas.invalidate();
     }
 
+
+
+    //TODO: create state when push is activated
     public void pushAction(View view) {
 
     }
+
+
 
     public void showPushActionMenu(View v) {
         PopupMenu popup = new PopupMenu(this, v);
@@ -135,20 +154,27 @@ public class MainActivity extends Activity implements PopupMenu.OnMenuItemClickL
         popup.show();
     }
 
+
+
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.push_pose:
-                ;
-                return true;
-            case R.id.push_subtask:
-                ;
-                return true;
-            case R.id.push_object_id:
-                ;
-                return true;
-            default:
-                return false;
+        try {
+            switch (item.getItemId()) {
+                case R.id.push_pose:
+                    rsaBaseRepo.sendActionInfo(ActionKind.PUSH_POSE);
+                    return true;
+                case R.id.push_subtask:
+                    rsaBaseRepo.sendActionInfo(ActionKind.PUSH_SUBTASK);
+                    return true;
+                case R.id.push_object_id:
+                    rsaBaseRepo.sendActionInfo(ActionKind.PUSH_OBJ_ID);
+                    return true;
+                default:
+                    return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 

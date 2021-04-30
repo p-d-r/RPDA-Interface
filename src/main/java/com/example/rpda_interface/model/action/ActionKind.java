@@ -8,6 +8,7 @@ public enum ActionKind {
     MOVE_REL_OBJ,
     BRANCH,
     JUMP,
+    MOVE,
     GRIPPER,
     EXECUTE,
     QUIT,

@@ -58,6 +58,7 @@ public class RSABaseRepository implements Runnable {
         //Do conversion of messages here
         ActionKind actionKind = getActionKindFromPrefix(actionDesc);
         switch(actionKind) {
+            case MOVE: ;
             case MOVE_ABS: break;
             case MOVE_REL: break;
             case MOVE_REL_OBJ: break;

@@ -25,6 +25,11 @@ public class VisualState implements Comparable
         transitions = new ArrayList<>();
     }
 
+    public VisualState(int id) {
+        this.id = id;
+        transitions = new ArrayList<>();
+    }
+
     public static void stateDeleted() {numberOfStates--;}
 
     public int getVerticalOffset() {

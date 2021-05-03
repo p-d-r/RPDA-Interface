@@ -11,6 +11,7 @@ import com.example.rpda_interface.model.automaton.VisualConstants;
 import com.example.rpda_interface.model.automaton.VisualRPDA;
 import com.example.rpda_interface.model.automaton.VisualState;
 import com.example.rpda_interface.model.automaton.VisualTransition;
+import com.example.rpda_interface.repository.RSABaseRepository;
 
 import java.util.Stack;
 
@@ -19,11 +20,13 @@ public class RPDAViewModel {
 
     private Stack<RPDAAction> undoActions;
     private Stack<RPDAAction> redoActions;
+    private RSABaseRepository repo;
     private VisualRPDA rpda;
 
-    public RPDAViewModel(Context context) {
+    public RPDAViewModel(Context context, RSABaseRepository repo) {
         undoActions = new Stack<>();
         redoActions = new Stack<>();
+        this.repo = repo;
         rpda = new VisualRPDA(new VisualState(VisualConstants.getPointInDp(context,
                                               VisualConstants.INITIAL_STATE_POSITION), 0));
     }

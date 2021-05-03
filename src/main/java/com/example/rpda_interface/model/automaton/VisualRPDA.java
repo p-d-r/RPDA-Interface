@@ -10,12 +10,18 @@ public class VisualRPDA
     private int visualHeight;
     private int visualWidth;
     private VisualState currentState;
+    private String name;
 
 
     public VisualRPDA(VisualState initialState ){
         states = new HashMap<>();
         currentState = initialState;
         states.put(currentState.getId(), currentState);
+    }
+
+    public VisualRPDA(String name) {
+        this.name = name;
+        states = new HashMap<>();
     }
 
     public int getVisualHeight() {
@@ -49,6 +55,10 @@ public class VisualRPDA
         currentState = target;
 
         return link;
+    }
+
+    public void addState(int id) {
+        states.put(id, new VisualState(id));
     }
 
     public void removeState(VisualState state) {

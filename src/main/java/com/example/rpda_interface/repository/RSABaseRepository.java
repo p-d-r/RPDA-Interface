@@ -2,15 +2,21 @@ package com.example.rpda_interface.repository;
 
 import com.example.rpda_interface.model.SocketConnector.SocketConnector;
 import com.example.rpda_interface.model.action.ActionKind;
+import com.example.rpda_interface.model.automaton.VisualRPDA;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;d
+import java.util.HashMap;
+import java.util.Map;
 
 public class RSABaseRepository implements Runnable {
 
     private static ActionKind currentActionKind = ActionKind.NO_ACTION;
+    private VisualRPDA rpda;
 
 
 
@@ -28,17 +34,13 @@ public class RSABaseRepository implements Runnable {
             BufferedReader reader = new BufferedReader(receiver);
 
             while (currentActionKind != ActionKind.QUIT) {
-                if (!receiver.ready())
-                    Thread.sleep(100);
-
-                handleAction(reader.readLine());
+                String str = reader.readLine();
+                System.out.println("Message: " + str);
+                updateRpdaSet(str);
             }
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("RSABaseRepository-Thread " + Thread.currentThread().getId() + " will be shut down due to error.");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            System.err.println("RSABaseRepository - Thread was sent to sleep while being interrupted.");
         }
 
         while (currentActionKind != ActionKind.QUIT) {
@@ -50,6 +52,63 @@ public class RSABaseRepository implements Runnable {
 
     private synchronized void setCurrentActionKind(ActionKind actionKind) {
         currentActionKind = actionKind;
+    }
+
+
+    private void updateRpdaSet(String message) {
+        String name = "";
+        CharacterIterator iterator = new StringCharacterIterator(message);
+        while (iterator.current() != ',') {
+            name+=iterator.current();
+            iterator.next();
+        }
+
+        iterator.next();
+        rpda = new VisualRPDA(name);
+        HashMap<Integer, Integer> transitions = new HashMap<>();
+
+        while(iterator.current() != CharacterIterator.DONE) {
+                String id = "";
+                while (iterator.current() != ',') {
+                    id += iterator.current();
+                    iterator.next();
+                }
+
+                iterator.next();
+                boolean isBranching;
+                if (iterator.current() == 1)
+                    isBranching = false;
+                else
+                    isBranching = true;
+
+                iterator.next();
+
+                int num_transitions;
+                if (iterator.current() == 1)
+                    isBranching = false;
+                else
+                    isBranching = true;
+
+                iterator.next();
+
+                while (iterator.current() != ';') {
+                    String targetId="";
+                    while (iterator.current() != ',') {
+                        targetId += iterator.current();
+                        iterator.next();
+                    }
+
+                    transitions.put(Integer.parseInt(id), Integer.parseInt(targetId));
+                    iterator.next();
+                }
+
+                rpda.addState(Integer.parseInt(id));
+                iterator.next();
+        }
+
+        for (Map.Entry<Integer, Integer> entry : transitions.entrySet()) {
+            rpda.getState(entry.getKey()).addTransition(rpda.getState(entry.getValue()));
+        }
     }
 
 
